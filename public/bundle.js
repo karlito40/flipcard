@@ -26,6 +26,19 @@ if (typeof Object.assign != 'function') {
   })();
 }
 
+var addDeck = function addDeck(name) {
+  return {
+    type: 'ADD_DECK',
+    data: name
+  };
+};
+var showAddDeck = function showAddDeck() {
+  return { type: 'SHOW_ADD_DECK' };
+};
+var hideAddDeck = function hideAddDeck() {
+  return { type: 'HIDE_ADD_DECK' };
+};
+
 var cards = function cards(state, action) {
   switch (action.type) {
     case 'ADD_CARD':
@@ -41,8 +54,36 @@ var cards = function cards(state, action) {
   }
 };
 
+var decks = function decks(state, action) {
+  switch (action.type) {
+    case 'ADD_DECK':
+      var newDeck = {
+        name: action.data,
+        id: Date.now()
+      };
+
+      return state.concat([newDeck]);
+
+    default:
+      return state || [];
+  }
+};
+
+var addingDeck = function addingDeck(state, action) {
+  switch (action.type) {
+    case 'SHOW_ADD_DECK':
+      return true;
+    case 'HIDE_ADD_DECK':
+      return false;
+    default:
+      return state || false;
+  }
+};
+
 var store = Redux.createStore(Redux.combineReducers({
-  cards: cards
+  cards: cards,
+  decks: decks,
+  addingDeck: addingDeck
 }));
 
 var App = function App(props) {
@@ -84,22 +125,26 @@ var Sidebar = React.createClass({
   }
 });
 
-ReactDOM.render(React.createElement(
-  App,
-  null,
-  React.createElement(Sidebar, { decks: [{ name: 'Deck 1' }], addingDeck: false })
-), document.getElementById('root'));
+function run() {
+  var state = store.getState();
 
-// store.subscribe(() => {
-//   console.log(store.getState());
-// });
-// console.log('store', store)
-// store.dispatch({
-//   type: 'ADD_CARD',
-//   data: {
-//     front: 'front',
-//     back: 'back'
-//   }
-// })
+  ReactDOM.render(React.createElement(
+    App,
+    null,
+    React.createElement(Sidebar, { decks: state.decks, addingDeck: state.addingDeck })
+  ), document.getElementById('root'));
+}
+run();
+store.subscribe(run);
+
+window.show = function () {
+  return store.dispatch(showAddDeck());
+};
+window.hide = function () {
+  return store.dispatch(hideAddDeck());
+};
+window.add = function () {
+  return store.dispatch(addDeck(Date.now()));
+};
 
 },{}]},{},[1]);
