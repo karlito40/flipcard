@@ -4,6 +4,7 @@ import React from 'react';
 import {Provider} from 'react-redux';
 import {createStore, combineReducers} from 'redux';
 import App from './components/App';
+import VisibleCards from './components/VisibleCards';
 import {Router, Route, browserHistory} from 'react-router';
 import {syncHistoryWithStore, routerReducer} from 'react-router-redux';
 
@@ -17,7 +18,9 @@ function run() {
   let state = store.getState();
   ReactDOM.render(<Provider store={store}>
       <Router history={history}>
-        <Route path='/' component={App}/>
+        <Route path='/' component={App}>
+          <Route path='/deck/:deckId' component={VisibleCards} />
+        </Route>
       </Router>
     </Provider>
    , document.getElementById('root'));
