@@ -4,16 +4,21 @@ import React from 'react';
 import {Provider} from 'react-redux';
 import {createStore, combineReducers} from 'redux';
 import App from './components/App';
-import Sidebar from './components/Sidebar';
+import {Router, Route, browserHistory} from 'react-router';
+import {syncHistoryWithStore, routerReducer} from 'react-router-redux';
+
+
+reducers.routing = routerReducer;
 
 const store = createStore(combineReducers(reducers));
+const history = syncHistoryWithStore(browserHistory, store);
 
 function run() {
   let state = store.getState();
   ReactDOM.render(<Provider store={store}>
-      <App>
-        <Sidebar />
-      </App>
+      <Router history={history}>
+        <Route path='/' component={App}/>
+      </Router>
     </Provider>
    , document.getElementById('root'));
 
