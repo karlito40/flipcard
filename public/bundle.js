@@ -3050,13 +3050,15 @@ var KNOWN_STATICS = {
 };
 
 module.exports = function hoistNonReactStatics(targetComponent, sourceComponent) {
-    var keys = Object.getOwnPropertyNames(sourceComponent);
-    for (var i=0; i<keys.length; ++i) {
-        if (!REACT_STATICS[keys[i]] && !KNOWN_STATICS[keys[i]]) {
-            try {
-                targetComponent[keys[i]] = sourceComponent[keys[i]];
-            } catch (error) {
+    if (typeof sourceComponent !== 'string') { // don't hoist over string (html) components
+        var keys = Object.getOwnPropertyNames(sourceComponent);
+        for (var i=0; i<keys.length; ++i) {
+            if (!REACT_STATICS[keys[i]] && !KNOWN_STATICS[keys[i]]) {
+                try {
+                    targetComponent[keys[i]] = sourceComponent[keys[i]];
+                } catch (error) {
 
+                }
             }
         }
     }
@@ -26539,17 +26541,23 @@ var _reactRouter = require('react-router');
 
 var _reactRouterRedux = require('react-router-redux');
 
+var _localStore = require('./localStore');
+
+var localStore = _interopRequireWildcard(_localStore);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 reducers.routing = _reactRouterRedux.routerReducer;
 
-var store = (0, _redux.createStore)((0, _redux.combineReducers)(reducers));
+var store = (0, _redux.createStore)((0, _redux.combineReducers)(reducers), localStore.get());
 var history = (0, _reactRouterRedux.syncHistoryWithStore)(_reactRouter.browserHistory, store);
 
 function run() {
   var state = store.getState();
+  localStore.set(state, ['decks', 'cards']);
+
   _reactDom2.default.render(_react2.default.createElement(
     _reactRedux.Provider,
     { store: store },
@@ -26577,7 +26585,7 @@ window.add = function () {
   return store.dispatch(addDeck(Date.now()));
 };
 
-},{"./components/App":260,"./components/VisibleCards":262,"./reducers":263,"react":242,"react-dom":51,"react-redux":54,"react-router":97,"react-router-redux":64,"redux":248}],260:[function(require,module,exports){
+},{"./components/App":260,"./components/VisibleCards":262,"./localStore":263,"./reducers":264,"react":242,"react-dom":51,"react-redux":54,"react-router":97,"react-router-redux":64,"redux":248}],260:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -26754,6 +26762,23 @@ var Cards = function Cards(_ref2) {
 exports.default = (0, _reactRedux.connect)(mapStateToProps)(Cards);
 
 },{"react":242,"react-redux":54}],263:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var get = exports.get = function get() {
+  return JSON.parse(localStorage.getItem('state')) || undefined;
+};
+var set = exports.set = function set(state, props) {
+  var toSave = {};
+  props.forEach(function (p) {
+    return toSave[p] = state[p];
+  });
+  localStorage.setItem('state', JSON.stringify(state));
+};
+
+},{}],264:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
